@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="register_guest"
+        android:enabled="true"
+        android:icon="@drawable/ic_visitor"
+        android:shortcutShortLabel="@string/shortcut_register_guest_short"
+        android:shortcutLongLabel="@string/shortcut_register_guest_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="ir.factory.entryexit"
+            android:targetClass="ir.factory.entryexit.ui.MainActivity">
+            <extra android:name="extra_jump_to_type" android:value="VISITOR" />
+        </intent>
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="open_dashboard"
+        android:enabled="true"
+        android:icon="@drawable/ic_dashboard"
+        android:shortcutShortLabel="@string/shortcut_dashboard_short"
+        android:shortcutLongLabel="@string/shortcut_dashboard_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="ir.factory.entryexit"
+            android:targetClass="ir.factory.entryexit.ui.AdminDashboardActivity" />
+    </shortcut>
+</shortcuts>

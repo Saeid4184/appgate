@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت و همگام‌سازی مرکزی کارخانه بتن</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase (compat SDK — works without a build step) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+        // Dedicated "Web app" config registered in Firebase Console (Project settings → Your
+        // apps → Web). Using a separate web apiKey — rather than the Android one from
+        // google-services.json, which Google restricts to the Android app's package/SHA-1 —
+        // is required for sign-in to work from the browser.
+        const firebaseConfig = {
+            apiKey: "AIzaSyDx2AvcncaIQpHqqVCt5_HVlyqDcaKojvM",
+            authDomain: "ir-factory-gate.firebaseapp.com",
+            projectId: "ir-factory-gate",
+            storageBucket: "ir-factory-gate.firebasestorage.app",
+            messagingSenderId: "505534908610",
+            appId: "1:505534908610:web:e71afcf85445d960be535b",
+            measurementId: "G-5SLLGDFTPP"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #0f172a; /* Slate 900 base */
+        }
+        /* Custom scrollbar for premium look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fbbf24;
+        }
+        /* Shimmer Animation for AI elements */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-bg {
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- SECURE ADMIN LOGIN SCREEN (Displayed first if not authenticated) -->
+    <div id="loginGateway" class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-slate-800/90 border border-slate-700 p-8 rounded-3xl shadow-2xl w-full max-w-md backdrop-blur-md relative overflow-hidden">
+            <!-- Decorative light effects -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-600/10 rounded-full blur-2xl"></div>
+
+            <div class="text-center mb-6 relative">
+                <div class="w-16 h-16 bg-amber-500 text-slate-950 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-amber-500/20 mb-4 text-2xl font-bold">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">ورود به پنل مرکزی کارخانه بتن</h2>
+                <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">با همان حساب مدیریتی که در اپلیکیشن اندروید ساخته‌اید وارد شوید</p>
+            </div>
+
+            <!-- Error Notification inside Login Box -->
+            <div id="loginError" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-xl text-xs mb-4 flex items-center space-x-2 space-x-reverse animate-pulse">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span id="loginErrorText">ایمیل یا رمز عبور اشتباه است!</span>
+            </div>
+
+            <div class="space-y-4 relative">
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1.5 font-bold">ایمیل:</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute right-3 top-3 text-slate-500 text-xs"></i>
+                        <input type="email" id="loginEmail" placeholder="admin@example.com" class="w-full bg-slate-950/60 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl py-2.5 pr-9 pl-3 text-xs text-white focus:outline-none transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1.5 font-bold">رمز عبور ورود:</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute right-3 top-3 text-slate-500 text-xs"></i>
+                        <input type="password" id="loginPassword" class="w-full bg-slate-950/60 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl py-2.5 pr-9 pl-3 text-xs text-white focus:outline-none transition-all">
+                    </div>
+                </div>
+
+                <button onclick="handleLogin()" id="loginButton" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/10 flex items-center justify-center space-x-2 space-x-reverse">
+                    <i class="fa-solid fa-arrow-right-to-bracket text-sm"></i>
+                    <span>ورود امن به سامانه</span>
+                </button>
+            </div>
+            
+            <p class="text-[10px] text-center text-slate-500 mt-6 leading-relaxed border-t border-slate-700/50 pt-4">فقط حساب‌هایی با نقش «مدیر» اجازه ورود به این پنل را دارند؛ نگهبانان باید از خود اپلیکیشن اندروید استفاده کنند</p>
+        </div>
+    </div>
+
+    <!-- MAIN APPLICATION CONTAINER (Hidden until authenticated) -->
+    <div id="mainDashboardApp" class="hidden flex-grow flex flex-col">
+        <!-- Top Navigation Bar -->
+        <header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="bg-amber-500 text-slate-950 p-2 rounded-xl font-bold flex items-center justify-center">
+                        <i class="fa-solid fa-industry text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-bold tracking-wide text-white">سامانه نظارت مرکزی کارخانه بتن</h1>
+                        <p class="text-[10px] text-amber-400">اتصال زنده به فایرستور — همان دیتابیسی که اپلیکیشن اندروید نگهبانان از آن استفاده می‌کند</p>
+                    </div>
+                </div>
+                
+                <!-- Sync Status and Device count Indicator -->
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-full text-[10px] sm:text-xs flex items-center space-x-2 space-x-reverse animate-pulse">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        <span id="syncStatus">دیتابیس ابری فایربیس فعال</span>
+                    </div>
+                    <div class="bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700 text-[10px] sm:text-xs text-slate-300">
+                        <i class="fa-solid fa-user-shield text-amber-400 ml-1"></i>
+                        <span id="loggedInAdminName">مدیر</span>
+                    </div>
+                    <button onclick="handleLogout()" class="bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-400 p-1.5 rounded-lg border border-slate-700 hover:border-red-500/30 transition-all" title="خروج">
+                        <i class="fa-solid fa-power-off text-xs sm:text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
+            <div class="space-y-6">
+                <!-- Tab Headers (Full Width Grid) -->
+                <div class="bg-slate-800 p-2 rounded-2xl shadow-md flex flex-wrap gap-2 border border-slate-700">
+                    <button onclick="switchAdminTab('dashboard')" id="tabBtn-dashboard" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 transition-all flex items-center justify-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>داشبورد و مانیتورینگ زنده</span>
+                    </button>
+                    <button onclick="switchAdminTab('gemini-ai')" id="tabBtn-gemini-ai" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center space-x-2 space-x-reverse border border-purple-500/20 bg-purple-500/5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i>
+                        <span class="text-purple-300">دستیار هوشمند Gemini</span>
+                    </button>
+                    <button onclick="switchAdminTab('customize')" id="tabBtn-customize" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>قالب‌بندی و تم گوشی‌ها</span>
+                    </button>
+                    <button onclick="switchAdminTab('excel')" id="tabBtn-excel" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>گزارش‌گیری اکسل (۴گانه)</span>
+                    </button>
+                    <button onclick="switchAdminTab('hosting')" id="tabBtn-hosting" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>آموزش اتصال و میزبانی</span>
+                    </button>
+                </div>
+
+                <!-- TAB 1: Real-time Dashboard & Analytics -->
+                <div id="tab-dashboard" class="space-y-6">
+                    <!-- Stat Cards Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-400">پرسنل حاضر در گیت</span>
+                                <span class="w-9 h-9 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-user-check"></i></span>
+                            </div>
+                            <div class="flex items-baseline space-x-2 space-x-reverse mt-3">
+                                <p id="activePersonnelCount" class="text-3xl font-bold text-white">۰</p>
+                                <span class="text-[10px] text-slate-400">نفر حاضر</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-400">ماشین‌آلات حاضر (میکسر/لودر)</span>
+                                <span class="w-9 h-9 bg-blue-500/10 text-blue-400 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-truck-pickup"></i></span>
+                            </div>
+                            <div class="flex items-baseline space-x-2 space-x-reverse mt-3">
+                                <p id="activeMachineryCount" class="text-3xl font-bold text-white">۰</p>
+                                <span class="text-[10px] text-slate-400">دستگاه فعال</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-400">رانندگان ترانزیت مستقر</span>
+                                <span class="w-9 h-9 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-id-card"></i></span>
+                            </div>
+                            <div class="flex items-baseline space-x-2 space-x-reverse mt-3">
+                                <p id="activeDriversCount" class="text-3xl font-bold text-white">۰</p>
+                                <span class="text-[10px] text-slate-400">راننده فعال</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-400">مهمانان و بازرسان حاضر</span>
+                                <span class="w-9 h-9 bg-purple-500/10 text-purple-400 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-user-tag"></i></span>
+                            </div>
+                            <div class="flex items-baseline space-x-2 space-x-reverse mt-3">
+                                <p id="activeVisitorsCount" class="text-3xl font-bold text-white">۰</p>
+                                <span class="text-[10px] text-slate-400">نفر مهمان</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Cloud Sync Simulation and Terminal Map -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Left: Live Activity Feed (Time Sequence) -->
+                        <div class="lg:col-span-8 bg-slate-800 rounded-xl border border-slate-700 shadow-sm overflow-hidden flex flex-col">
+                            <div class="bg-slate-900 px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+                                <h3 class="text-xs font-bold text-white flex items-center space-x-2 space-x-reverse">
+                                    <i class="fa-solid fa-signal text-emerald-500 animate-pulse"></i>
+                                    <span>دفتر زنده تردد کارگاه (دریافت آنی از گوشی‌ها)</span>
+                                </h3>
+                                <div class="flex items-center space-x-3 space-x-reverse">
+                                    <span class="text-[10px] bg-slate-800 text-amber-400 px-2.5 py-1 rounded-full border border-slate-700 font-bold" id="logCounter">۰ تردد ثبت شده</span>
+                                </div>
+                            </div>
+                            <div class="divide-y divide-slate-700 max-h-[400px] overflow-y-auto flex-grow" id="liveActivityLogList">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Right: Live connection status & currently-inside breakdown -->
+                        <div class="lg:col-span-4 space-y-6">
+                            <!-- Real-time Firestore connection status -->
+                            <div class="bg-slate-800 p-5 rounded-xl border border-emerald-600/40 shadow-sm space-y-3">
+                                <div class="flex items-center space-x-2.5 space-x-reverse border-b border-slate-700 pb-3">
+                                    <i class="fa-solid fa-satellite-dish text-emerald-500 text-lg"></i>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-white">اتصال زنده به فایرستور</h4>
+                                        <p class="text-[9px] text-slate-400 mt-0.5">همان دیتابیسی که همه‌ی گوشی‌های نگهبانی به آن می‌نویسند</p>
+                                    </div>
+                                </div>
+                                <div id="firestoreConnectionStatus" class="flex items-center space-x-2 space-x-reverse text-xs">
+                                    <span class="w-2 h-2 rounded-full bg-slate-500 animate-pulse"></span>
+                                    <span class="text-slate-400">در حال اتصال…</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 leading-relaxed">این پنل هیچ داده‌ی نمایشی یا شبیه‌سازی‌شده‌ای ندارد؛ هر عددی که می‌بینید مستقیماً از دیتابیس واقعی خوانده شده است.</p>
+                            </div>
+
+                            <!-- Breakdown by category -->
+                            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm space-y-3">
+                                <h4 class="text-xs font-bold text-white flex items-center space-x-2 space-x-reverse">
+                                    <i class="fa-solid fa-layer-group text-blue-400"></i>
+                                    <span>افراد/موارد داخل کارخانه به تفکیک دسته</span>
+                                </h4>
+                                <div class="space-y-2.5 pt-1" id="categoryBreakdownList">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Gemini AI Smart Dashboard & Natural Language Query -->
+                <div id="tab-gemini-ai" class="hidden space-y-6">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm space-y-6">
+                        <div class="flex flex-wrap items-center justify-between border-b border-slate-700 pb-4 gap-4">
+                            <div class="flex items-center space-x-3 space-x-reverse">
+                                <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 border border-purple-500/20">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-xl animate-pulse"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-white">تحلیل هوشمند و دستیار تصمیم‌گیری Gemini</h3>
+                                    <p class="text-[10px] text-slate-400 mt-1">مدیریت هوشمند ترددها، ردیابی ناوگان و کاهش تاخیر در تخلیه بتن.</p>
+                                </div>
+                            </div>
+                            <div class="text-left w-full sm:w-auto">
+                                <input type="password" id="geminiApiKey" onchange="saveSharedApiKey(this.value)" placeholder="کلید API (یک‌بار همین‌جا یا داخل اپ وارد کنید، کافی است)" class="w-full sm:w-44 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] bg-slate-950 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                            </div>
+                        </div>
+
+                        <!-- Main AI quick-trigger blocks -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="border border-slate-700 rounded-xl p-4 bg-gradient-to-br from-purple-500/5 to-amber-500/5 space-y-3 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[9px] bg-purple-500/10 text-purple-300 font-bold px-2 py-0.5 rounded-full uppercase border border-purple-500/20">تحلیل ترافیک و گلوگاه‌ها</span>
+                                    <h4 class="text-xs font-bold text-white mt-2">خلاصه راندمان ناوگان و توزیع ترددها</h4>
+                                    <p class="text-[10px] text-slate-400 leading-relaxed mt-1">تعداد خودروها و بارهای بتنی با چه شتابی ثبت شدند؟ تحلیل توزیع دپارتمان‌ها و گلوگاه‌های گیت کارخانه را از هوش مصنوعی بخواهید.</p>
+                                </div>
+                                <button onclick="generateAiTrafficAnalysis()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center space-x-2 space-x-reverse transition-all shadow-lg shadow-purple-500/10">
+                                    <i class="fa-solid fa-chart-pie"></i>
+                                    <span>تحلیل فوری لاگ‌های امروز با Gemini</span>
+                                </button>
+                            </div>
+
+                            <div class="border border-slate-700 rounded-xl p-4 space-y-3 bg-slate-900/30 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[9px] bg-slate-700 text-slate-300 font-bold px-2 py-0.5 rounded-full border border-slate-600">بهینه‌سازی ناوگان</span>
+                                    <h4 class="text-xs font-bold text-white mt-2">بهبود چرخه تردد رانندگان و میکسرها</h4>
+                                    <p class="text-[10px] text-slate-400 leading-relaxed mt-1">شناسایی رانندگانی که بیشترین فرکانس ورود و خروج را ثبت کرده‌اند جهت بهینه‌سازی زنجیره تامین و جلوگیری از خواب ماشین‌آلات بتن‌ریزی.</p>
+                                </div>
+                                <button onclick="generateAiShiftRecommendations()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center space-x-2 space-x-reverse transition-all">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    <span>توصیه‌های لجستیکی توزیع ناوگان رانندگی</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Chat System -->
+                        <div class="border border-slate-700 rounded-xl overflow-hidden bg-slate-900/40">
+                            <div class="bg-slate-900 px-4 py-3 border-b border-slate-700 flex items-center space-x-2 space-x-reverse">
+                                <i class="fa-solid fa-comment-dots text-purple-400 text-xs"></i>
+                                <span class="text-xs font-bold text-slate-300">پرسش گفتاری آزاد از دیتابیس تردد بتن:</span>
+                            </div>
+                            <div class="p-4 space-y-4">
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="fillAndSubmitAiQuery('لیست مراجعین متفرقه و مهمانان فعال را به طور خلاصه گزارش کن')" class="bg-slate-800 hover:bg-slate-700 text-[9px] border border-slate-700 rounded-full px-2.5 py-1 text-slate-300 transition-all font-medium">مهمانان حاضر در کارخانه؟</button>
+                                    <button onclick="fillAndSubmitAiQuery('رانندگان خودروهای میکسر به همراه شماره پلاک که الان حضور دارند')" class="bg-slate-800 hover:bg-slate-700 text-[9px] border border-slate-700 rounded-full px-2.5 py-1 text-slate-300 transition-all font-medium">وضعیت رانندگان ترانزیت؟</button>
+                                    <button onclick="fillAndSubmitAiQuery('آمار کل رویدادهای خروجی ثبت شده به تفکیک پرسنل و ماشین‌آلات')" class="bg-slate-800 hover:bg-slate-700 text-[9px] border border-slate-700 rounded-full px-2.5 py-1 text-slate-300 transition-all font-medium">تعداد کل خروجی‌های امروز؟</button>
+                                </div>
+
+                                <div class="flex items-center space-x-2 space-x-reverse">
+                                    <input type="text" id="aiQueryInput" placeholder="مثلاً: کدام میکسرها یا کامیون‌ها امروز بیشترین تردد را داشته‌اند؟" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl py-2 px-4 text-xs text-white focus:ring-1 focus:ring-purple-500 focus:outline-none">
+                                    <button onclick="submitCustomAiQuery()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-all flex items-center space-x-1.5 space-x-reverse shadow-md shadow-purple-600/10">
+                                        <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                                        <span>ارسال</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Results output interface with shimmer loader -->
+                        <div id="aiResponseContainer" class="hidden border border-purple-500/30 rounded-xl bg-purple-500/5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2.5 flex justify-between items-center text-xs font-bold">
+                                <span class="flex items-center space-x-1.5 space-x-reverse">
+                                    <i class="fa-solid fa-brain animate-bounce"></i>
+                                    <span>تحلیل هوشمند موتور پردازش زنده Gemini 3.1 Flash</span>
+                                </span>
+                                <span class="text-[9px] font-normal opacity-80" id="aiResponseTime">چند ثانیه پیش</span>
+                            </div>
+                            <div class="p-5 text-xs text-slate-300 leading-relaxed space-y-3 bg-slate-950/40" id="aiResponseContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: Visual Application Customizer -->
+                <div id="tab-customize" class="hidden space-y-6">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm space-y-6">
+                        <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-white">تنظیمات تم و کدهای ظاهری ۵ گوشی کلاینت</h3>
+                                <p class="text-[10px] text-slate-400 mt-1">تغییرات ظاهری مربوط به برنامه نگهبانان را به صورت کلاینتی شخصی‌سازی کنید.</p>
+                            </div>
+                            <button onclick="resetThemeToDefault()" class="text-xs text-amber-500 hover:text-amber-400 font-bold">
+                                <i class="fa-solid fa-rotate-left ml-1"></i> بازنشانی تنظیمات اولیه
+                            </button>
+                        </div>
+
+                        <!-- Config Sliders and Selects -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <!-- Left: Customizer controls -->
+                            <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-300 block">فونت فعال اپلیکیشن کلاینت:</label>
+                                    <select onchange="updateSimStyle()" id="themeFontFamily" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-2 px-3 text-xs text-white focus:outline-none">
+                                        <option value="'Vazirmatn', sans-serif">وزیرمتن (استاندارد کارخانه)</option>
+                                        <option value="'Courier New', monospace">فونت فنی تک‌فاصله (Courier New)</option>
+                                        <option value="system-ui, sans-serif">فونت فابریک سیستمی اندروید</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-300 block flex justify-between">
+                                        <span>اندازه فونت نوشته‌ها و دکمه‌ها:</span>
+                                        <span id="themeFontSizeVal" class="text-amber-500 font-bold">۱۳ Sp</span>
+                                    </label>
+                                    <input type="range" min="11" max="22" value="13" oninput="updateSimStyle()" id="themeFontSize" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-300 block flex justify-between">
+                                        <span>میزان گردی لبه‌ها (Corner Radius):</span>
+                                        <span id="themeBtnRadiusVal" class="text-amber-500 font-bold">۱۰ Dp</span>
+                                    </label>
+                                    <input type="range" min="0" max="30" value="10" oninput="updateSimStyle()" id="themeBtnRadius" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-300 block flex justify-between">
+                                        <span>پدینگ داخلی دکمه‌های ثبت تردد:</span>
+                                        <span id="themeBtnPaddingVal" class="text-amber-500 font-bold">۸ Dp</span>
+                                    </label>
+                                    <input type="range" min="4" max="20" value="8" oninput="updateSimStyle()" id="themeBtnPadding" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-300 block">رنگ اصلی هویت بصری دکمه‌ها:</label>
+                                    <div class="flex space-x-2 space-x-reverse mt-2">
+                                        <button onclick="setThemeColor('#f59e0b')" class="w-8 h-8 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-amber-500" id="color-amber"></button>
+                                        <button onclick="setThemeColor('#3b82f6')" class="w-8 h-8 rounded-full bg-blue-500 ring-offset-2 hover:ring-2 hover:ring-blue-500" id="color-blue"></button>
+                                        <button onclick="setThemeColor('#10b981')" class="w-8 h-8 rounded-full bg-emerald-500 ring-offset-2 hover:ring-2 hover:ring-emerald-500" id="color-emerald"></button>
+                                        <button onclick="setThemeColor('#6366f1')" class="w-8 h-8 rounded-full bg-indigo-500 ring-offset-2 hover:ring-2 hover:ring-indigo-500" id="color-indigo"></button>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-300 block">پس‌زمینه تمپلیت گوشی‌ها:</label>
+                                    <div class="grid grid-cols-2 gap-2 mt-1">
+                                        <button onclick="setClientTheme('light')" id="themeBtn-light" class="py-2 px-3 text-xs font-bold rounded-lg border border-slate-750 text-slate-400 hover:bg-slate-700">
+                                            <i class="fa-solid fa-sun ml-1"></i> روز / روشن
+                                        </button>
+                                        <button onclick="setClientTheme('dark')" id="themeBtn-dark" class="py-2 px-3 text-xs font-bold rounded-lg border-2 border-amber-500 bg-amber-500/10 text-white">
+                                            <i class="fa-solid fa-moon ml-1"></i> شب / تاریک
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Small Preview Box of a client roster entry -->
+                            <div class="lg:col-span-4 bg-slate-900 border border-slate-700 rounded-2xl p-5 flex flex-col justify-between" id="themePreviewContainer">
+                                <h4 class="text-xs font-bold text-white border-b border-slate-800 pb-2 mb-4 flex justify-between items-center">
+                                    <span>پیش‌نمایش آنلاین دکمه کلاینت</span>
+                                    <span class="text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">Client Preview</span>
+                                </h4>
+                                <div class="p-4 rounded-xl border border-slate-800 bg-slate-950/60 flex items-center justify-between" id="previewRow">
+                                    <div class="flex items-center space-x-2 space-x-reverse">
+                                        <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                                            <i class="fa-solid fa-circle text-[6px]"></i>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-[10px] font-bold leading-none">میکسر شماره ۳</p>
+                                            <span class="text-[8px] text-slate-500 font-bold font-mono block mt-1">۷۲ ج ۴۲ | ترانزیت بتن</span>
+                                        </div>
+                                    </div>
+                                    <button id="previewBtn" class="font-bold py-1.5 px-3 rounded-lg text-[10px] bg-amber-500 text-slate-950 shadow-sm flex items-center space-x-1 space-x-reverse leading-none">
+                                        <i class="fa-solid fa-arrow-right-to-bracket text-[8px] ml-1"></i>
+                                        <span>ثبت ورود</span>
+                                    </button>
+                                </div>
+                                <p class="text-[9px] text-slate-500 text-center mt-4 leading-relaxed">تغییرات اسلایدرها و تم رنگی بلافاصله روی این دکمه نمونه اعمال می‌شوند.</p>
+                            </div>
+                        </div>
+
+                        <!-- Config Export Block -->
+                        <div class="bg-slate-900 text-slate-300 p-4 rounded-xl space-y-3 mt-4 border border-slate-800">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-white flex items-center space-x-1.5 space-x-reverse"><i class="fa-solid fa-file-code text-amber-500"></i><span>فایل خروجی همگام‌سازی ظاهر با گوشی‌ها</span></span>
+                                <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">theme_config.json</span>
+                            </div>
+                            <pre class="text-[10px] bg-slate-950 p-3 rounded-lg overflow-x-auto text-amber-500 font-mono" id="configJsonPreview">
+{
+  "theme": "dark",
+  "fontFamily": "Vazirmatn",
+  "fontSizeSp": 13,
+  "buttonCornerRadiusDp": 10,
+  "buttonPaddingDp": 8,
+  "primaryColorHex": "#f59e0b"
+}
+                            </pre>
+                            <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pt-2">
+                                <span class="text-[10px] text-slate-400 leading-relaxed">این فایل را دانلود کرده و در مسیر پوشه Assets پروژه اندروید کپی کنید تا قالب برنامه کلاینت‌ها فوراً آپدیت شود.</span>
+                                <button onclick="downloadJsonConfig()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-1.5 px-3 rounded-lg text-xs flex items-center space-x-1 space-x-reverse self-end sm:self-auto">
+                                    <i class="fa-solid fa-download"></i>
+                                    <span>دانلود فایل قالب</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: Advanced Excel & Reports Exporter -->
+                <div id="tab-excel" class="hidden space-y-6">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm space-y-4 text-slate-200">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-slate-700 pb-4">
+                            <div>
+                                <h3 class="text-md font-bold text-white">گزارش رویدادهای تردد (ورود/خروج) بر اساس بازه زمانی</h3>
+                                <p class="text-xs text-slate-400 mt-1">تک‌تک رویدادهای ثبت‌شده در بازه انتخابی را نمایش می‌دهد؛ نه فقط آخرین وضعیت.</p>
+                            </div>
+                            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg text-xs flex items-center justify-center space-x-2 space-x-reverse shadow-md transition-all">
+                                <i class="fa-solid fa-file-excel text-sm"></i>
+                                <span>دانلود فایل اکسل (CSV) از همین بازه</span>
+                            </button>
+                        </div>
+
+                        <!-- Time-range selector -->
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-300">بازه زمانی گزارش:</label>
+                                <select onchange="onReportPeriodChange()" id="filterPeriod" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                                    <option value="today">امروز (به تفکیک ساعت)</option>
+                                    <option value="week">۷ روز اخیر (به تفکیک روز)</option>
+                                    <option value="month">۳۰ روز اخیر (به تفکیک روز)</option>
+                                    <option value="custom">بازه دلخواه</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1" id="customFromWrap" style="display:none">
+                                <label class="text-xs font-bold text-slate-300">از تاریخ:</label>
+                                <input type="date" id="filterFrom" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                            </div>
+                            <div class="space-y-1" id="customToWrap" style="display:none">
+                                <label class="text-xs font-bold text-slate-300">تا تاریخ:</label>
+                                <input type="date" id="filterTo" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                            </div>
+                            <div class="space-y-1 flex items-end" id="customApplyWrap" style="display:none">
+                                <button onclick="fetchReportLogs()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-1.5 px-3 rounded-lg text-xs">اعمال بازه</button>
+                            </div>
+                        </div>
+
+                        <!-- Category / search filters (applied client-side on the fetched range) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-300">فیلتر گروه ۴گانه:</label>
+                                <select onchange="applyFilters()" id="filterType" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                                    <option value="all">همه دسته‌ها</option>
+                                    <option value="personnel">پرسنل کارخانه</option>
+                                    <option value="machinery">ماشین‌آلات و بونکرها</option>
+                                    <option value="drivers">رانندگان ترانزیت</option>
+                                    <option value="visitors">مهمانان و مراجعین</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-300">فیلتر نوع رویداد:</label>
+                                <select onchange="applyFilters()" id="filterAction" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                                    <option value="all">ورود و خروج</option>
+                                    <option value="IN">فقط ورود</option>
+                                    <option value="OUT">فقط خروج</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-300">جستجوی نام، پلاک یا جزئیات:</label>
+                                <input type="text" oninput="applyFilters()" id="filterSearch" placeholder="مثال: صادقی، ۹۲ ج، ۳۳۴" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Per-hour/per-day breakdown of the selected range -->
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-bold text-white flex items-center space-x-2 space-x-reverse">
+                                <i class="fa-solid fa-chart-column text-amber-500"></i>
+                                <span id="reportBreakdownTitle">تفکیک رویدادها</span>
+                            </h4>
+                            <div class="flex flex-wrap gap-2" id="reportBreakdownList">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Event log table for the selected range -->
+                        <div class="overflow-x-auto rounded-lg border border-slate-750">
+                            <table class="w-full text-right text-xs">
+                                <thead class="bg-slate-900 text-slate-300 font-bold border-b border-slate-700">
+                                    <tr>
+                                        <th class="p-3">زمان رویداد</th>
+                                        <th class="p-3">نام و مشخصات</th>
+                                        <th class="p-3">دپارتمان / نوع</th>
+                                        <th class="p-3">نوع رویداد</th>
+                                        <th class="p-3">جزئیات</th>
+                                        <th class="p-3">ثبت‌کننده</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-700" id="reportTableBody">
+                                    <!-- Populated dynamically via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: Deployment & Custom Domain Hosting Guide -->
+                <div id="tab-hosting" class="hidden space-y-6">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm space-y-6">
+                        <div>
+                            <h3 class="text-md font-bold text-white flex items-center space-x-2 space-x-reverse">
+                                <i class="fa-solid fa-cloud-arrow-up text-amber-500 animate-pulse"></i>
+                                <span>راهنمای راه‌اندازی پنل روی دامنه اختصاصی با یوزر/پسورد</span>
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-1">چگونه این فایل HTML را به یک وب‌سایت امن ادمین در اینترنت تبدیل کنیم؟</p>
+                        </div>
+
+                        <!-- Step 1: Free Hosting with Domain -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-bold text-white bg-slate-900/60 py-2 px-3 rounded-lg border-r-4 border-amber-500">
+                                روش اول: استفاده از سایت رایگان Netlify (پیشنهادی و فوق‌العاده ساده)
+                            </h4>
+                            <ol class="text-xs text-slate-300 space-y-2 list-decimal pr-5 leading-relaxed">
+                                <li>فایل <code class="bg-slate-950 text-amber-400 px-1 py-0.5 rounded font-mono text-[11px]">index.html</code> پنل را که از ویرایشگر دانلود کرده‌اید، در یک پوشه بگذارید.</li>
+                                <li>وارد سایت <a href="https://netlify.com" target="_blank" class="text-amber-500 hover:underline">Netlify.com</a> شده و یک اکانت بسازید.</li>
+                                <li>پوشه حاوی فایل را گرفته و در کادر آپلود مستقیم کشیده و رها کنید (Drag and Drop). سایت شما در ۳ ثانیه راه‌اندازی می‌شود!</li>
+                                <li>در بخش <span class="font-bold text-white">Domain settings</span> می‌توانید به سادگی دامنه ملی خود را (مانند <code class="bg-slate-950 text-white px-1 py-0.5 rounded font-mono text-[11px]">panel.factory.ir</code>) به هاست متصل کنید.</li>
+                            </ol>
+                        </div>
+
+                        <!-- Step 2: Authentication Configurations -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-bold text-white bg-slate-900/60 py-2 px-3 rounded-lg border-r-4 border-purple-500">
+                                امکان تغییر مشخصات ادمین و ارتقای امنیت ورود
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                در داخل کدهای همین فایل <code class="bg-slate-950 text-amber-400 px-1 py-0.5 rounded font-mono text-[11px]">index.html</code>، در بخش کدهای جاوااسکریپت، متغیرهای مربوط به نام کاربری و رمز عبور به گونه‌ای تعبیه شده‌اند که می‌توانید به صورت دستی آن‌ها را تغییر دهید. همچنین در صورت راه‌اندازی سیستم ابری، می‌توانید منطق ورود را به متدهای امن Firebase auth متصل کنید.
+                            </p>
+                        </div>
+
+                        <!-- Step 3: Embedding in Android App -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-bold text-white bg-slate-900/60 py-2 px-3 rounded-lg border-r-4 border-emerald-500">
+                                روش سوم: قرار دادن پنل درون خود اپلیکیشن اندروید (WebView)
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                اگر می‌خواهید مدیر بدون نیاز به مرورگر، آمار را در خود گوشی ببیند، یک کلاس اکتیویتی جدید با لایه‌بندی <code class="bg-slate-950 text-white px-1 py-0.5 rounded font-mono text-[11px]">WebView</code> بسازید و آدرس سایت آپلود شده را به آن ارجاع دهید:
+                            </p>
+                            <div class="bg-slate-950 p-3 rounded-lg overflow-x-auto text-[11px] font-mono text-slate-300">
+                                <span class="text-slate-500">// کد نمایش پنل مرکزی در WebView اندروید:</span><br>
+                                val myWebView: WebView = findViewById(R.id.webview)<br>
+                                myWebView.settings.javaScriptEnabled = true<br>
+                                myWebView.loadUrl(<span class="text-emerald-400">"https://panel.yourfactory.ir"</span>)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification system instead of browser alert() -->
+    <div id="toastNotification" class="fixed bottom-4 left-4 bg-slate-900 text-white border border-slate-700 py-3 px-5 rounded-xl shadow-2xl z-50 flex items-center space-x-3 space-x-reverse transition-all duration-300 transform translate-y-20 opacity-0">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastText" class="text-xs font-medium">تنظیمات به روز رسانی شد</span>
+    </div>
+
+    <script>
+        // Live state mirrored from Firestore in real time (see startFirestoreListeners below).
+        // No demo/fake/simulated data anywhere in this file anymore.
+        let personsData = []; // mirrors the "persons" collection
+        let logsData = [];    // mirrors the most recent 100 docs in "logs", newest first
+        let sharedGeminiApiKey = ''; // the key shared with the Android app via settings/app
+
+        const TYPE_KEY_MAP = { PERSONNEL: 'personnel', MACHINERY: 'machinery', DRIVER: 'drivers', VISITOR: 'visitors' };
+        const CATEGORY_LABEL_MAP = { personnel: 'پرسنل', machinery: 'ماشین‌آلات', drivers: 'راننده', visitors: 'مهمان' };
+
+        function formatTime(ts) {
+            if (!ts) return '-';
+            try {
+                return new Date(ts).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+                return '-';
+            }
+        }
+
+        function findLastPerformer(personId) {
+            const log = logsData.find(function (l) { return l.personId === personId; });
+            return log && log.performedByName ? log.performedByName : '—';
+        }
+
+        // Active States
+        let themeConfig = {
+            theme: 'dark',
+            fontFamily: "'Vazirmatn', sans-serif",
+            fontSizeSp: 13,
+            buttonCornerRadiusDp: 10,
+            buttonPaddingDp: 8,
+            primaryColorHex: '#f59e0b'
+        };
+
+        let unsubscribePersons = null;
+        let unsubscribeLogs = null;
+
+        function startFirestoreListeners() {
+            const statusEl = document.getElementById('firestoreConnectionStatus');
+
+            // The app and this panel share one Gemini key via settings/app, so entering it in
+            // either place is enough — no need to paste it twice.
+            db.collection('settings').doc('app').get().then(function (doc) {
+                const key = doc.exists ? (doc.data().geminiApiKey || '') : '';
+                if (key) {
+                    sharedGeminiApiKey = key;
+                    const input = document.getElementById('geminiApiKey');
+                    if (input && !input.value) input.value = key;
+                }
+            }).catch(function () { /* offline or no doc yet — fine, field just stays empty */ });
+
+            unsubscribePersons = db.collection('persons').onSnapshot(function (snapshot) {
+                personsData = snapshot.docs.map(function (doc) {
+                    const d = doc.data();
+                    return {
+                        id: doc.id,
+                        name: d.name || '(بدون نام)',
+                        category: d.group || '-',
+                        type: TYPE_KEY_MAP[d.type] || 'personnel',
+                        isInside: !!d.isInside,
+                        lastEventAt: d.lastEventAt || 0,
+                        isBlacklisted: !!d.isBlacklisted
+                    };
+                });
+                if (statusEl) {
+                    statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span>' +
+                        '<span class="text-emerald-400 font-bold">متصل — بروزرسانی زنده</span>';
+                }
+                updateDashboardCounters();
+                renderReportTable();
+                renderCategoryBreakdown();
+            }, function (error) {
+                if (statusEl) {
+                    statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span>' +
+                        '<span class="text-rose-400 font-bold">خطای اتصال: ' + error.message + '</span>';
+                }
+            });
+
+            unsubscribeLogs = db.collection('logs').orderBy('timestamp', 'desc').limit(100)
+                .onSnapshot(function (snapshot) {
+                    logsData = snapshot.docs.map(function (doc) {
+                        const d = doc.data();
+                        return {
+                            id: doc.id,
+                            personId: d.personId || '',
+                            personName: d.personName || '',
+                            type: TYPE_KEY_MAP[d.type] || 'personnel',
+                            category: d.group || '-',
+                            action: d.action || 'IN',
+                            timestamp: d.timestamp || 0,
+                            detail: d.detail || '',
+                            performedByName: d.performedByName || '—'
+                        };
+                    });
+                    renderLiveLogList();
+                    renderReportTable(); // "last recorded by" column depends on logsData too
+                }, function (error) {
+                    showToast('خطا در دریافت رویدادها: ' + error.message);
+                });
+        }
+
+        function stopFirestoreListeners() {
+            if (unsubscribePersons) { unsubscribePersons(); unsubscribePersons = null; }
+            if (unsubscribeLogs) { unsubscribeLogs(); unsubscribeLogs = null; }
+            personsData = [];
+            logsData = [];
+        }
+
+        function renderCategoryBreakdown() {
+            const el = document.getElementById('categoryBreakdownList');
+            if (!el) return;
+            const order = ['personnel', 'machinery', 'drivers', 'visitors'];
+            el.innerHTML = order.map(function (key) {
+                const count = personsData.filter(function (p) { return p.type === key && p.isInside; }).length;
+                return '<div class="flex justify-between items-center text-[11px]">' +
+                    '<span class="text-slate-400">' + CATEGORY_LABEL_MAP[key] + '</span>' +
+                    '<span class="text-emerald-400 font-bold">' + count + ' نفر/مورد</span></div>';
+            }).join('');
+        }
+
+
+        // Auth state: Firebase remembers sign-in across reloads on its own (no localStorage needed).
+        window.onload = function() {
+            auth.onAuthStateChanged(function (user) {
+                if (user) {
+                    checkRoleAndEnter(user);
+                } else {
+                    showLoginGateway();
+                }
+            });
+        };
+
+        /** Only accounts with role === "ADMIN" in the "users/{uid}" Firestore document (the
+         *  same collection the Android app writes to at sign-up) may enter this panel. */
+        function checkRoleAndEnter(user) {
+            db.collection('users').doc(user.uid).get().then(function (doc) {
+                if (doc.exists && doc.data().role === 'ADMIN') {
+                    const el = document.getElementById('loggedInAdminName');
+                    if (el) el.innerText = doc.data().name || user.email;
+                    showMainApplication();
+                } else {
+                    showToast('این حساب دسترسی مدیر ندارد. با اپلیکیشن اندروید نگهبانی کنید یا با مدیر سیستم تماس بگیرید.');
+                    auth.signOut();
+                    showLoginGateway();
+                }
+            }).catch(function (err) {
+                showToast('خطا در دریافت اطلاعات کاربر: ' + err.message);
+                auth.signOut();
+                showLoginGateway();
+            });
+        }
+
+        function showMainApplication() {
+            document.getElementById('loginGateway').classList.add('hidden');
+            document.getElementById('mainDashboardApp').classList.remove('hidden');
+            document.body.className = "text-slate-200 bg-slate-950 transition-all duration-300";
+
+            startFirestoreListeners();
+            applyThemePreview();
+        }
+
+        function showLoginGateway() {
+            stopFirestoreListeners();
+            document.getElementById('loginGateway').classList.remove('hidden');
+            document.getElementById('mainDashboardApp').classList.add('hidden');
+            document.body.className = "text-slate-200 bg-slate-900 transition-all duration-300";
+        }
+
+        function mapFirebaseAuthError(error) {
+            const code = error.code || '';
+            if (code.indexOf('user-not-found') !== -1) return 'کاربری با این ایمیل یافت نشد.';
+            if (code.indexOf('wrong-password') !== -1) return 'رمز عبور اشتباه است.';
+            if (code.indexOf('invalid-email') !== -1) return 'فرمت ایمیل نامعتبر است.';
+            if (code.indexOf('too-many-requests') !== -1) return 'تلاش‌های زیاد ناموفق؛ کمی صبر کنید.';
+            if (code.indexOf('network') !== -1) return 'اتصال اینترنت برقرار نیست.';
+            return error.message || 'خطای ورود';
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value;
+            const errorBox = document.getElementById('loginError');
+            const errorText = document.getElementById('loginErrorText');
+            const btn = document.getElementById('loginButton');
+
+            if (!email || !pass) {
+                errorText.innerText = 'ایمیل و رمز عبور را وارد کنید.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            errorBox.classList.add('hidden');
+
+            auth.signInWithEmailAndPassword(email, pass).then(function (cred) {
+                btn.disabled = false;
+                checkRoleAndEnter(cred.user);
+            }).catch(function (error) {
+                btn.disabled = false;
+                errorText.innerText = mapFirebaseAuthError(error);
+                errorBox.classList.remove('hidden');
+            });
+        }
+
+        function handleLogout() {
+            auth.signOut();
+            showLoginGateway();
+            showToast("از حساب کاربری خارج شدید.");
+        }
+
+        // Tab Switching for main control view
+        function switchAdminTab(tabName) {
+            const tabs = ['dashboard', 'gemini-ai', 'customize', 'excel', 'hosting'];
+            tabs.forEach(t => {
+                const element = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`tabBtn-${t}`);
+                if (t === tabName) {
+                    element.classList.remove('hidden');
+                    if (t === 'gemini-ai') {
+                        btn.className = "flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold bg-purple-600 text-white transition-all flex items-center justify-center space-x-2 space-x-reverse shadow-lg shadow-purple-600/10";
+                    } else {
+                        btn.className = "flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 transition-all flex items-center justify-center space-x-2 space-x-reverse";
+                    }
+                } else {
+                    element.classList.add('hidden');
+                    if (t === 'gemini-ai') {
+                        btn.className = "flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center space-x-2 space-x-reverse border border-purple-500/20 bg-purple-500/5";
+                    } else {
+                        btn.className = "flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center space-x-2 space-x-reverse";
+                    }
+                }
+            });
+            if (tabName === 'excel' && !window.__reportFetchedOnce) {
+                window.__reportFetchedOnce = true;
+                fetchReportLogs();
+            }
+        }
+
+        // Style customizer scripts
+        function updateSimStyle() {
+            const font = document.getElementById('themeFontFamily').value;
+            const size = document.getElementById('themeFontSize').value;
+            const radius = document.getElementById('themeBtnRadius').value;
+            const padding = document.getElementById('themeBtnPadding').value;
+
+            // Update state
+            themeConfig.fontFamily = font;
+            themeConfig.fontSizeSp = size;
+            themeConfig.buttonCornerRadiusDp = radius;
+            themeConfig.buttonPaddingDp = padding;
+
+            // UI Label updates
+            document.getElementById('themeFontSizeVal').innerText = `${size} Sp`;
+            document.getElementById('themeBtnRadiusVal').innerText = `${radius} Dp`;
+            document.getElementById('themeBtnPaddingVal').innerText = `${padding} Dp`;
+
+            applyThemePreview();
+            updateJsonPreview();
+        }
+
+        function setThemeColor(colorHex) {
+            themeConfig.primaryColorHex = colorHex;
+            
+            const colors = {
+                '#f59e0b': 'color-amber',
+                '#3b82f6': 'color-blue',
+                '#10b981': 'color-emerald',
+                '#6366f1': 'color-indigo'
+            };
+
+            Object.keys(colors).forEach(c => {
+                const el = document.getElementById(colors[c]);
+                if (c === colorHex) {
+                    el.classList.add('ring-2', 'ring-offset-2');
+                    if (c === '#f59e0b') el.classList.add('ring-amber-500');
+                    if (c === '#3b82f6') el.classList.add('ring-blue-500');
+                    if (c === '#10b981') el.classList.add('ring-emerald-500');
+                    if (c === '#6366f1') el.classList.add('ring-indigo-500');
+                } else {
+                    el.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500', 'ring-blue-500', 'ring-emerald-500', 'ring-indigo-500');
+                }
+            });
+
+            applyThemePreview();
+            updateJsonPreview();
+            showToast("پالت رنگ کلاینت‌ها آپدیت شد");
+        }
+
+        function setClientTheme(themeName) {
+            themeConfig.theme = themeName;
+            const btnLight = document.getElementById('themeBtn-light');
+            const btnDark = document.getElementById('themeBtn-dark');
+
+            if (themeName === 'light') {
+                btnLight.className = "py-2 px-3 text-xs font-bold rounded-lg border-2 border-amber-500 bg-amber-500/10 text-white";
+                btnDark.className = "py-2 px-3 text-xs font-bold rounded-lg border border-slate-750 text-slate-400 hover:bg-slate-700";
+            } else {
+                btnDark.className = "py-2 px-3 text-xs font-bold rounded-lg border-2 border-amber-500 bg-amber-500/10 text-white";
+                btnLight.className = "py-2 px-3 text-xs font-bold rounded-lg border border-slate-750 text-slate-400 hover:bg-slate-700";
+            }
+
+            applyThemePreview();
+            updateJsonPreview();
+        }
+
+        function applyThemePreview() {
+            const previewBox = document.getElementById('themePreviewContainer');
+            const previewRow = document.getElementById('previewRow');
+            const previewBtn = document.getElementById('previewBtn');
+            if(!previewBox || !previewBtn) return;
+            
+            // Background Card Sync
+            if (themeConfig.theme === 'dark') {
+                previewBox.style.backgroundColor = '#0f172a'; // Slate 900
+                previewRow.style.backgroundColor = '#020617';
+                previewRow.style.color = '#f8fafc';
+            } else {
+                previewBox.style.backgroundColor = '#ffffff';
+                previewRow.style.backgroundColor = '#f1f5f9';
+                previewRow.style.color = '#0f172a';
+            }
+
+            // Apply font family & sizes to preview button
+            previewBox.style.fontFamily = themeConfig.fontFamily;
+            previewBtn.style.fontSize = `${themeConfig.fontSizeSp - 2}px`;
+            previewBtn.style.borderRadius = `${themeConfig.buttonCornerRadiusDp}px`;
+            previewBtn.style.paddingTop = `${themeConfig.buttonPaddingDp / 2}px`;
+            previewBtn.style.paddingBottom = `${themeConfig.buttonPaddingDp / 2}px`;
+            previewBtn.style.backgroundColor = themeConfig.primaryColorHex;
+            previewBtn.style.color = '#0f172a';
+        }
+
+        function updateJsonPreview() {
+            const preview = document.getElementById('configJsonPreview');
+            if(preview) {
+                preview.innerText = JSON.stringify(themeConfig, null, 2);
+            }
+        }
+
+        function resetThemeToDefault() {
+            themeConfig = {
+                theme: 'dark',
+                fontFamily: "'Vazirmatn', sans-serif",
+                fontSizeSp: 13,
+                buttonCornerRadiusDp: 10,
+                buttonPaddingDp: 8,
+                primaryColorHex: '#f59e0b'
+            };
+            
+            document.getElementById('themeFontFamily').value = themeConfig.fontFamily;
+            document.getElementById('themeFontSize').value = themeConfig.fontSizeSp;
+            document.getElementById('themeBtnRadius').value = themeConfig.buttonCornerRadiusDp;
+            document.getElementById('themeBtnPadding').value = themeConfig.buttonPaddingDp;
+            
+            document.getElementById('themeFontSizeVal').innerText = '13 Sp';
+            document.getElementById('themeBtnRadiusVal').innerText = '10 Dp';
+            document.getElementById('themeBtnPaddingVal').innerText = '8 Dp';
+            
+            setThemeColor('#f59e0b');
+            setClientTheme('dark');
+            applyThemePreview();
+            updateJsonPreview();
+            showToast("تنظیمات ظاهری با موفقیت ریست شد");
+        }
+
+        // UI renderers
+        function renderLiveLogList() {
+            const list = document.getElementById('liveActivityLogList');
+            if (!list) return;
+
+            list.innerHTML = '';
+
+            logsData.forEach(item => {
+                const isIn = item.action === 'IN';
+                const logItem = document.createElement('div');
+                logItem.className = "px-6 py-3 flex items-center justify-between hover:bg-slate-700/40 transition-all";
+
+                logItem.innerHTML = `
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-2.5 h-2.5 rounded-full ${isIn ? 'bg-emerald-500' : 'bg-rose-500'}"></div>
+                        <div class="text-right">
+                            <span class="text-xs font-bold text-white">${item.personName}</span>
+                            <span class="text-[8px] bg-slate-900 border border-slate-750 text-slate-400 px-1.5 py-0.5 rounded-md mr-2 font-bold">${CATEGORY_LABEL_MAP[item.type] || item.type}</span>
+                            ${item.detail ? `<span class="text-[8px] text-amber-400 mr-1">(${item.detail})</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4 space-x-reverse text-left">
+                        <span class="text-[9px] bg-slate-850 border border-slate-700 text-amber-500 px-2.5 py-0.5 rounded font-bold">${item.performedByName}</span>
+                        <div class="text-[10px] text-slate-400 font-mono flex items-center space-x-2 space-x-reverse">
+                            <span class="${isIn ? 'text-emerald-400' : 'text-rose-400'}">
+                                <i class="fa-solid ${isIn ? 'fa-arrow-right-to-bracket' : 'fa-arrow-right-from-bracket'} text-[8px] ml-1"></i>${formatTime(item.timestamp)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(logItem);
+            });
+
+            document.getElementById('logCounter').innerText = `${logsData.length} رویداد اخیر`;
+        }
+
+        function updateDashboardCounters() {
+            const activePersonnel = personsData.filter(i => i.type === 'personnel' && i.isInside).length;
+            const activeMachinery = personsData.filter(i => i.type === 'machinery' && i.isInside).length;
+            const activeDrivers = personsData.filter(i => i.type === 'drivers' && i.isInside).length;
+            const activeVisitors = personsData.filter(i => i.type === 'visitors' && i.isInside).length;
+
+            document.getElementById('activePersonnelCount').innerText = activePersonnel;
+            document.getElementById('activeMachineryCount').innerText = activeMachinery;
+            document.getElementById('activeDriversCount').innerText = activeDrivers;
+            document.getElementById('activeVisitorsCount').innerText = activeVisitors;
+        }
+
+        // Full event log for the currently selected report range (NOT the capped 100-doc
+        // live mirror in `logsData` — this is fetched fresh from Firestore per range so
+        // week/month reports are complete, not just whatever happens to still be in the
+        // live feed's window).
+        let reportLogsData = [];
+
+        /** Returns {start, end} millis for the period currently selected in the UI. */
+        function computeReportRange() {
+            const period = document.getElementById('filterPeriod').value;
+            const now = new Date();
+            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+            if (period === 'today') {
+                const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+                return { start: start.getTime(), end: endOfToday.getTime(), period };
+            }
+            if (period === 'week') {
+                const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6, 0, 0, 0, 0);
+                return { start: start.getTime(), end: endOfToday.getTime(), period };
+            }
+            if (period === 'month') {
+                const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29, 0, 0, 0, 0);
+                return { start: start.getTime(), end: endOfToday.getTime(), period };
+            }
+            // custom
+            const fromVal = document.getElementById('filterFrom').value;
+            const toVal = document.getElementById('filterTo').value;
+            const start = fromVal ? new Date(fromVal + 'T00:00:00').getTime() : endOfToday.getTime() - 86400000;
+            const end = toVal ? new Date(toVal + 'T23:59:59').getTime() : endOfToday.getTime();
+            return { start, end, period };
+        }
+
+        function onReportPeriodChange() {
+            const period = document.getElementById('filterPeriod').value;
+            const showCustom = period === 'custom';
+            document.getElementById('customFromWrap').style.display = showCustom ? '' : 'none';
+            document.getElementById('customToWrap').style.display = showCustom ? '' : 'none';
+            document.getElementById('customApplyWrap').style.display = showCustom ? '' : 'none';
+            if (!showCustom) fetchReportLogs();
+        }
+
+        /** Queries Firestore DIRECTLY for the selected date range (not the capped local
+         *  mirror), so week/month reports are always complete. */
+        async function fetchReportLogs() {
+            const body = document.getElementById('reportTableBody');
+            if (body) {
+                body.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500 text-xs">در حال دریافت رویدادها…</td></tr>`;
+            }
+            const { start, end } = computeReportRange();
+            try {
+                const snapshot = await db.collection('logs')
+                    .where('timestamp', '>=', start)
+                    .where('timestamp', '<=', end)
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                reportLogsData = snapshot.docs.map(function (doc) {
+                    const d = doc.data();
+                    return {
+                        id: doc.id,
+                        personId: d.personId || '',
+                        personName: d.personName || '',
+                        type: TYPE_KEY_MAP[d.type] || 'personnel',
+                        category: d.group || '-',
+                        action: d.action || 'IN',
+                        timestamp: d.timestamp || 0,
+                        detail: d.detail || '',
+                        performedByName: d.performedByName || '—'
+                    };
+                });
+                renderReportTable();
+            } catch (error) {
+                if (body) {
+                    body.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-400 text-xs">خطا در دریافت گزارش: ${error.message}</td></tr>`;
+                }
+            }
+        }
+
+        function renderReportTable() {
+            const body = document.getElementById('reportTableBody');
+            if (!body) return;
+
+            const typeFilter = document.getElementById('filterType').value;
+            const actionFilter = document.getElementById('filterAction').value;
+            const searchVal = document.getElementById('filterSearch').value.toLowerCase();
+
+            const filtered = reportLogsData.filter(item => {
+                const matchesType = typeFilter === 'all' || item.type === typeFilter;
+                const matchesAction = actionFilter === 'all' || item.action === actionFilter;
+                const matchesSearch = !searchVal ||
+                                      item.personName.toLowerCase().includes(searchVal) ||
+                                      (item.category || '').toLowerCase().includes(searchVal) ||
+                                      (item.detail || '').toLowerCase().includes(searchVal);
+                return matchesType && matchesAction && matchesSearch;
+            });
+
+            renderReportBreakdown(filtered);
+
+            body.innerHTML = '';
+            if (filtered.length === 0) {
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-6 text-center text-slate-500 text-xs">هیچ رویدادی در این بازه یافت نشد. فیلترها یا بازه زمانی را تغییر دهید.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/20 transition-all border-b border-slate-700/50";
+                const isIn = item.action === 'IN';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono text-slate-400">${formatTime(item.timestamp)}</td>
+                    <td class="p-3 font-bold text-white">${item.personName}</td>
+                    <td class="p-3 text-slate-400">${CATEGORY_LABEL_MAP[item.type] || item.type}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${isIn ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
+                            ${isIn ? 'ورود' : 'خروج'}
+                        </span>
+                    </td>
+                    <td class="p-3 text-slate-400">${item.detail || '-'}</td>
+                    <td class="p-3 font-bold text-slate-400">${item.performedByName}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        /** Buckets the filtered range by hour (today) or by day (week/month/custom) so the
+         *  report actually answers "how many events per hour/day", not just a flat list. */
+        function renderReportBreakdown(filtered) {
+            const listEl = document.getElementById('reportBreakdownList');
+            const titleEl = document.getElementById('reportBreakdownTitle');
+            if (!listEl) return;
+
+            const period = document.getElementById('filterPeriod').value;
+            const byHour = period === 'today';
+            titleEl.innerText = byHour ? 'تفکیک رویدادها بر اساس ساعت' : 'تفکیک رویدادها بر اساس روز';
+
+            const buckets = {};
+            filtered.forEach(item => {
+                const d = new Date(item.timestamp);
+                const key = byHour
+                    ? `${String(d.getHours()).padStart(2, '0')}:00`
+                    : `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+                if (!buckets[key]) buckets[key] = { in: 0, out: 0 };
+                if (item.action === 'IN') buckets[key].in++; else buckets[key].out++;
+            });
+
+            const keys = Object.keys(buckets).sort();
+            if (keys.length === 0) {
+                listEl.innerHTML = `<span class="text-[10px] text-slate-500">داده‌ای برای نمایش وجود ندارد.</span>`;
+                return;
+            }
+            listEl.innerHTML = keys.map(k => `
+                <div class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-[10px] flex items-center space-x-2 space-x-reverse">
+                    <span class="font-bold text-white">${k}</span>
+                    <span class="text-emerald-400">ورود ${buckets[k].in}</span>
+                    <span class="text-rose-400">خروج ${buckets[k].out}</span>
+                </div>
+            `).join('');
+        }
+
+        function applyFilters() {
+            renderReportTable();
+        }
+
+        function exportToExcel() {
+            let csvContent = "\uFEFF"; // UTF-8 BOM for Farsi characters in Excel
+            csvContent += "زمان رویداد,نام و مشخصات,بخش/دپارتمان,نوع تردد,نوع رویداد,جزئیات,ثبت‌کننده\n";
+
+            const typeFilter = document.getElementById('filterType').value;
+            const actionFilter = document.getElementById('filterAction').value;
+            const searchVal = document.getElementById('filterSearch').value.toLowerCase();
+
+            const filtered = reportLogsData.filter(item => {
+                const matchesType = typeFilter === 'all' || item.type === typeFilter;
+                const matchesAction = actionFilter === 'all' || item.action === actionFilter;
+                const matchesSearch = !searchVal ||
+                                      item.personName.toLowerCase().includes(searchVal) ||
+                                      (item.category || '').toLowerCase().includes(searchVal) ||
+                                      (item.detail || '').toLowerCase().includes(searchVal);
+                return matchesType && matchesAction && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                showToast("رکوردی برای خروجی گرفتن در این بازه/فیلتر وجود ندارد.");
+                return;
+            }
+
+            filtered.forEach(item => {
+                const row = [
+                    `"${formatTime(item.timestamp)}"`,
+                    `"${item.personName}"`,
+                    `"${item.category}"`,
+                    `"${CATEGORY_LABEL_MAP[item.type] || item.type}"`,
+                    `"${item.action === 'IN' ? 'ورود' : 'خروج'}"`,
+                    `"${item.detail || ''}"`,
+                    `"${item.performedByName}"`
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `گزارش_تردد_کارخانه_بتن_${dateStr}.csv`);
+            document.body.appendChild(link);
+            
+            link.click();
+            document.body.removeChild(link);
+            showToast("گزارش با فرمت اکسل بارگیری شد.");
+        }
+
+        function downloadJsonConfig() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(themeConfig, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "theme_config.json");
+            dlAnchorElem.click();
+            showToast("تنظیمات ظاهری با موفقیت دانلود شد");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            const text = document.getElementById('toastText');
+            if(!toast || !text) return;
+            
+            text.innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        // ==========================================
+        //         GEMINI API INTEGRATION
+        // ==========================================
+
+        /** Writes the key back to settings/app so the Android app picks it up without the
+         *  admin having to type it in there too. */
+        function saveSharedApiKey(value) {
+            const key = (value || '').trim();
+            if (!key || key === sharedGeminiApiKey) return;
+            sharedGeminiApiKey = key;
+            db.collection('settings').doc('app').set({ geminiApiKey: key }, { merge: true })
+                .then(function () { showToast('کلید API ذخیره و با اپ اندروید هم‌گام شد.'); })
+                .catch(function () { /* offline — the field still works locally this session */ });
+        }
+
+        async function callGeminiApi(systemPrompt, userQuery) {
+            const container = document.getElementById('aiResponseContainer');
+            const contentDiv = document.getElementById('aiResponseContent');
+            const responseTimeSpan = document.getElementById('aiResponseTime');
+            
+            container.classList.remove('hidden');
+            responseTimeSpan.innerText = "در حال تحلیل داده‌ها...";
+            contentDiv.innerHTML = `
+                <div class="space-y-3">
+                    <div class="h-4 shimmer-bg rounded-md w-3/4"></div>
+                    <div class="h-4 shimmer-bg rounded-md w-full"></div>
+                    <div class="h-4 shimmer-bg rounded-md w-5/6"></div>
+                </div>
+            `;
+
+            const apiInput = document.getElementById('geminiApiKey').value.trim();
+            const apiKey = apiInput || sharedGeminiApiKey || ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            let delay = 1000;
+            let success = false;
+            let resultJson = null;
+
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        resultJson = await response.json();
+                        success = true;
+                        break;
+                    } else {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2;
+                    }
+                } catch (err) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+
+            if (!success) {
+                contentDiv.innerHTML = `
+                    <div class="text-red-400 font-bold flex items-center space-x-2 space-x-reverse p-2">
+                        <i class="fa-solid fa-circle-exclamation text-lg text-red-500"></i>
+                        <span>خطا در ارتباط با سرور هوش مصنوعی گوگل (Gemini). لطفاً بعداً تلاش کرده یا در صورت لزوم کلید API معتبر خود را در کادر بالا وارد نمایید.</span>
+                    </div>
+                `;
+                responseTimeSpan.innerText = "خطا در برقراری ارتباط";
+                return;
+            }
+
+            const candidate = resultJson.candidates?.[0];
+            if (candidate && candidate.content?.parts?.[0]?.text) {
+                let text = candidate.content.parts[0].text;
+                
+                let formattedText = text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/### (.*?)\n/g, '<h4 class="text-amber-400 font-bold text-sm mt-3 border-b border-slate-800 pb-1">$1</h4>')
+                    .replace(/## (.*?)\n/g, '<h3 class="text-white font-bold text-md mt-4">$1</h3>')
+                    .replace(/\n/g, '<br>');
+
+                contentDiv.innerHTML = `<div class="prose prose-invert prose-sm text-slate-300 leading-relaxed font-medium">${formattedText}</div>`;
+                
+                const now = new Date();
+                responseTimeSpan.innerText = `به‌روزرسانی در ساعت ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            } else {
+                contentDiv.innerHTML = `<span class="text-slate-500">پاسخی دریافت نشد یا فرمت داده‌ها نامعتبر است.</span>`;
+                responseTimeSpan.innerText = "بدون پاسخ معتبر";
+            }
+        }
+
+        function generateAiTrafficAnalysis() {
+            const systemPrompt = `تو یک دستیار هوش مصنوعی و تحلیل‌گر ارشد کارخانه بتن آماده هستی. اطلاعات تردد امروز کارخانه را به زبان فارسی بررسی کرده و تحلیل کاملی از راندمان ناوگان، دپارتمان‌ها و گلوگاه‌ها در قالب موارد زیر ارائه بده:
+            ۱. زمان‌های اوج تردد و توزیع نوع ترددها.
+            ۲. راندمان ناوگان حمل (میکسرها و بونکرها) و تخمین زمان چرخه کارکرد.
+            ۳. پیشنهادهای بهبود زنجیره تامین بتن و لجستیک.`;
+
+            const dbSummary = personsData.map(item => ({
+                نام: item.name,
+                شناسه: item.id,
+                دپارتمان: item.category,
+                آخرین_رویداد: formatTime(item.lastEventAt),
+                حالت_فعلی: item.isBlacklisted ? "مسدود (لیست سیاه)" : (item.isInside ? "داخل کارخانه" : "خارج شده"),
+                ثبت_کننده: findLastPerformer(item.id),
+                گروه: item.type
+            }));
+
+            const userQuery = `داده‌های پایگاه داده تردد زنده امروز کارخانه به این شرح است:\n${JSON.stringify(dbSummary, null, 2)}\nلطفا گزارش تحلیلی راندمان را تهیه کن.`;
+            callGeminiApi(systemPrompt, userQuery);
+        }
+
+        function generateAiShiftRecommendations() {
+            const systemPrompt = `تو یک مشاور منابع انسانی و برنامه‌ریز لجستیک متخصص در کارخانجات بتن آماده هستی. با توجه به لاگ ترددهای امروز، توصیه‌ها و برنامه‌ریزی‌های بهینه‌سازی نوبت‌های کاری و استراحت رانندگان پمپ و میکسر را به زبان فارسی و لحن دلسوزانه و مهندسی بنویس.`;
+            
+            const dbSummary = personsData.map(item => ({
+                نام: item.name,
+                شناسه: item.id,
+                دپارتمان: item.category,
+                آخرین_رویداد: formatTime(item.lastEventAt),
+                حالت_فعلی: item.isBlacklisted ? "مسدود (لیست سیاه)" : (item.isInside ? "داخل کارخانه" : "خارج شده"),
+                گروه: item.type
+            }));
+
+            const userQuery = `با توجه به توزیع نیروها در بخش‌های مختلف:\n${JSON.stringify(dbSummary, null, 2)}\nتوصیه‌های کلیدی برای چیدمان شیفت فردا بنویس.`;
+            callGeminiApi(systemPrompt, userQuery);
+        }
+
+        function fillAndSubmitAiQuery(promptText) {
+            document.getElementById('aiQueryInput').value = promptText;
+            submitCustomAiQuery();
+        }
+
+        function submitCustomAiQuery() {
+            const query = document.getElementById('aiQueryInput').value.trim();
+            if (!query) {
+                showToast("لطفا ابتدا پرسش خود را تایپ کنید");
+                return;
+            }
+
+            const systemPrompt = `تو یک پاسخ‌دهنده هوشمند و موتور جستجوی داده‌های تردد کارخانه بتن هستی. وظیفه تو این است که به کاربر بگویی در بین ترددهای امروز چه اتفاقی افتاده است. پاسخ‌ها باید کوتاه، مستدل، دقیق و مستخرج از دیتابیس باشد. جواب‌ها را حتماً به زبان فارسی بنویس.`;
+            
+            const dbSummary = personsData.map(item => ({
+                نام: item.name,
+                شناسه: item.id,
+                دپارتمان: item.category,
+                آخرین_رویداد: formatTime(item.lastEventAt),
+                وضعیت: item.isBlacklisted ? "مسدود (لیست سیاه)" : (item.isInside ? "حاضر در کارخانه" : "خارج شده"),
+                آخرین_ثبت_کننده: findLastPerformer(item.id),
+                گروه: item.type
+            }));
+
+            const contextQuery = `پرسش کاربر: "${query}"\n\nدیتابیس زنده تردد کارخانه برای پاسخ دادن:\n${JSON.stringify(dbSummary, null, 2)}`;
+            callGeminiApi(systemPrompt, contextQuery);
+        }
+    </script>
+</body>
+</html>

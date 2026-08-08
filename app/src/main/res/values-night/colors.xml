@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Real dark-mode reskin: overrides the neutral/text/surface colors only.
+        toolbar_bg, safety_amber, status colors, white/black stay fixed (see base colors.xml
+        for why) so branding and status meaning stay consistent between themes.
+    -->
+
+    <!-- Text/icon "ink" colors -> light, for readability on dark surfaces. concrete_900 (primary
+         text) is pushed all the way to pure white per factory feedback that some text was still
+         unreadable; concrete_800/700 (secondary text) brightened by the same margin. -->
+    <color name="concrete_900">#FFFFFF</color>
+    <color name="concrete_800">#F2F3F4</color>
+    <color name="concrete_700">#DADDE0</color>
+    <color name="concrete_500">#ACB2B7</color>
+    <color name="concrete_300">#868D93</color>
+    <color name="concrete_200">#454B50</color>
+    <color name="concrete_100">#323740</color>
+    <color name="concrete_050">#272B31</color>
+
+    <!-- Surfaces: lightened a step from the original near-black, so text (especially at
+         reduced-opacity/secondary weight) has more contrast to sit on. -->
+    <color name="colorBackground">#1C1F22</color>
+    <color name="colorSurface">#282D32</color>
+    <color name="header_bg">#33362C</color>
+    <color name="status_gray_bg">#31363B</color>
+    <color name="status_green_bg">#1C3B2C</color>
+</resources>

@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: is the requester signed in at all?
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Helper: does the requester's own "users/{uid}" document say role == "ADMIN"?
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "ADMIN";
+    }
+
+    // persons: every signed-in guard/admin can read and write (check-in/out, add, edit).
+    // This intentionally does NOT restrict writes further (e.g. to "only admins can delete")
+    // because guards need to freely check people in/out and register new visitors/drivers
+    // as part of normal, everyday use.
+    match /persons/{personId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // logs: append-only from the app's point of view — every signed-in user can create new
+    // log entries (a check-in/out), and everyone can read them (for the activity feed and
+    // reports), but nobody can edit or delete a historical record once written.
+    match /logs/{logId} {
+      allow read, create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // inspections: weekly machinery visual/exterior inspections. Same append-only pattern as
+    // logs — every signed-in guard/admin can create a new inspection record and everyone can
+    // read them (for the tab-5 status list and Excel export), but a submitted inspection can't
+    // be edited or deleted afterward (it's a dated record, not a mutable roster entry).
+    match /inspections/{inspectionId} {
+      allow read, create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // settings/app: shared config (currently just the Gemini API key) so it only needs to be
+    // entered once — either in the app or the web panel — instead of separately in each.
+    match /settings/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // meta/fleetSeeded: written once via a transaction when the app first seeds the fixed
+    // machinery roster. Any signed-in user may attempt it (the transaction itself prevents
+    // duplicate seeding); nobody should delete it.
+    match /meta/{docId} {
+      allow read, write: if isSignedIn();
+      allow delete: if false;
+    }
+
+    // users: everyone signed in can read (needed so the web panel/app can look up names for
+    // "who performed this" displays), but a user can only ever edit their OWN profile, and
+    // only an existing admin can change someone else's role (e.g. promoting a guard to admin).
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+  }
+}

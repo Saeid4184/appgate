@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand palette: concrete gray + safety amber -->
+    <color name="concrete_900">#1F2429</color>
+    <color name="concrete_800">#2C3237</color>
+    <color name="concrete_700">#3D444B</color>
+    <color name="concrete_500">#6B7580</color>
+    <color name="concrete_300">#A7AEB4</color>
+    <color name="concrete_200">#D8DCDF</color>
+    <color name="concrete_100">#EEF0F1</color>
+    <color name="concrete_050">#F7F8F8</color>
+
+    <!-- Fixed brand color for toolbars/tabs/status bar and text-on-accent — intentionally
+         NOT overridden in dark mode, so the app keeps a consistent dark "site helmet" look
+         in both themes. The concrete_* shades above ARE overridden in values-night, since
+         they're reused as ordinary text/icon/surface colors. -->
+    <color name="toolbar_bg">#1F2429</color>
+
+    <color name="safety_amber">#F5A623</color>
+    <color name="safety_amber_dark">#D6890B</color>
+
+    <color name="status_green">#2E9E5B</color>
+    <color name="status_green_bg">#E3F5EB</color>
+    <color name="status_gray_bg">#EDEFF1</color>
+
+    <color name="danger_red">#D64545</color>
+    <color name="header_bg">#EFEAE0</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="colorPrimary">@color/toolbar_bg</color>
+    <color name="colorPrimaryVariant">@color/concrete_800</color>
+    <color name="colorSecondary">@color/safety_amber</color>
+    <color name="colorSecondaryVariant">@color/safety_amber_dark</color>
+    <color name="colorBackground">@color/concrete_050</color>
+    <color name="colorSurface">@color/white</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
+</resources>

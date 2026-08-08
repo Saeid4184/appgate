@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Used with ArrayAdapter for AutoCompleteTextView popups (e.g. department / machinery group
+     pickers). android.R.layout.simple_list_item_1 looked fine in light mode but its text color
+     doesn't reliably invert against our own dark-mode surface, so this pins both explicitly to
+     our theme's roles. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorSurface"
+    android:textColor="?attr/colorOnSurface"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="14dp"
+    android:textSize="15sp" />

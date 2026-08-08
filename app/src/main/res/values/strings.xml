@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">حراست سبحان بتن</string>
+    <string name="app_subtitle">مدیریت ورود و خروج</string>
+
+    <string name="category_personnel">پرسنل</string>
+    <string name="category_machinery">ماشین‌آلات</string>
+    <string name="category_visitor">مراجعین</string>
+    <string name="category_driver">رانندگان</string>
+
+    <string name="inside_count_format">%1$d نفر / مورد داخل کارخانه</string>
+
+    <string name="empty_list_roster">هنوز موردی ثبت نشده است.\nبرای افزودن، دکمه + را بزنید.</string>
+    <string name="empty_list_inside">در حال حاضر کسی داخل کارخانه نیست.</string>
+    <string name="empty_search">نتیجه‌ای یافت نشد.</string>
+
+    <string name="add_new">افزودن جدید</string>
+    <string name="add_new_person_title">ثبت مورد جدید</string>
+    <string name="hint_name">نام</string>
+    <string name="hint_extra_info">اطلاعات تکمیلی (اختیاری)</string>
+    <string name="hint_extra_info_machinery">شماره پلاک (اختیاری)</string>
+    <string name="hint_department">دپارتمان</string>
+    <string name="hint_machinery_group">گروه ماشین (مثلاً: میکسر، پمپ، وانت)</string>
+    <string name="hint_blacklist">لیست سیاه (مسدود کردن ورود)</string>
+    <string name="status_blacklisted">مسدود</string>
+    <string name="blacklist_toggled_success">وضعیت لیست سیاه به‌روزرسانی شد</string>
+
+    <string name="cargo_type_title">نوع محموله خروجی</string>
+    <string name="long_press_for_options_hint">برای انتخاب نوع محموله دیگر، دکمه خروج را نگه دارید</string>
+    <string name="service_count_today_format">سرویس امروز: %1$d</string>
+    <string name="dump_truck_warning_title">هشدار: تعداد سرویس بالا</string>
+    <string name="dump_truck_warning_message_format">این خودرو در ۲۴ ساعت گذشته %1$d سرویس ثبت کرده است (بیشتر از حد معمول ۴ تا ۵ سرویس). لطفاً بررسی شود: آیا راننده تعویض شده، آیا فشار بیش‌ازحد به راننده وارد شده، یا هر دلیل دیگری که نیاز به پیگیری دارد.</string>
+    <string name="dump_truck_warning_ack">متوجه شدم</string>
+    <string name="pump_dispatch_time_format">%1$s ساعت %2$s از کارخانه خارج شد</string>
+    <string name="logistics_invoice_dialog_title">شماره فاکتور کالای ورودی</string>
+    <string name="logistics_invoice_hint">شماره فاکتور</string>
+    <string name="logistics_invoice_no_cargo">این ماشین بدون بار وارد می‌شود (فاکتور لازم نیست)</string>
+    <string name="logistics_invoice_required_error">برای ورود کالا، وارد کردن شماره فاکتور الزامی است</string>
+    <string name="logistics_exit_slip_dialog_title">شماره برگه خروج کالا</string>
+    <string name="logistics_exit_slip_hint">شماره برگه خروج</string>
+    <string name="logistics_exit_slip_no_cargo">این ماشین بدون بار خارج می‌شود (برگه لازم نیست)</string>
+    <string name="logistics_exit_slip_required_error">برای خروج کالا، وارد کردن شماره برگه خروج الزامی است</string>
+    <string name="machinery_filter_all">همه ماشین‌آلات</string>
+    <string name="machinery_filter_mixer">میکسرها</string>
+    <string name="machinery_filter_dump_truck">کمپرسی و تریلی</string>
+    <string name="machinery_filter_pump">پمپ بتن</string>
+    <string name="machinery_filter_logistics">تدارکات</string>
+    <string name="settings_section_cargo_options">گزینه‌های بار هر دسته ماشین‌آلات</string>
+    <string name="settings_cargo_options_hint">هر گزینه را در یک خط بنویسید. این گزینه‌ها موقع ثبت خروج، فقط برای ماشین‌های همان دسته نمایش داده می‌شوند.</string>
+    <string name="cargo_options_saved">گزینه‌های بار ذخیره شد.</string>
+    <string-array name="cargo_types">
+        <item>بتن آماده</item>
+        <item>گازوئیل</item>
+        <item>نخاله و خاک</item>
+        <item>اعزام به تعمیرگاه</item>
+        <item>شن و ماسه معدنی</item>
+        <item>بدون بار (خالی)</item>
+    </string-array>
+
+    <string name="shortcut_register_guest_short">ثبت مهمان</string>
+    <string name="shortcut_register_guest_long">ثبت ورود مهمان جدید</string>
+    <string name="shortcut_dashboard_short">پنل مدیریت</string>
+    <string name="shortcut_dashboard_long">باز کردن پنل مدیریت</string>
+
+    <string name="new_visitor_checkin_title">ثبت ورود مهمان جدید</string>
+    <string name="hint_visitor_name">نام مهمان</string>
+    <string name="hint_visitor_department">واحد یا بخش مورد مراجعه</string>
+
+    <string name="new_driver_checkin_title">ثبت ورود راننده جدید</string>
+    <string name="hint_driver_name">نام راننده</string>
+    <string name="hint_driver_vehicle">ماشین معمول راننده (اختیاری)</string>
+
+    <string name="btn_save">ثبت</string>
+    <string name="btn_cancel">انصراف</string>
+    <string name="btn_checkin">ورود</string>
+    <string name="btn_checkout">خروج</string>
+    <string name="btn_confirm_checkout">تایید خروج</string>
+    <string name="btn_undo">لغو (بازگشت)</string>
+
+    <string name="status_inside">داخل</string>
+    <string name="status_outside">خارج</string>
+
+    <string name="checkin_success">ورود ثبت شد</string>
+    <string name="checkout_success">خروج ثبت شد</string>
+    <string name="person_added_success">با موفقیت ثبت شد</string>
+    <string name="error_generic">خطایی رخ داد</string>
+    <string name="error_name_empty">وارد کردن نام الزامی است</string>
+    <string name="error_department_empty">وارد کردن واحد مورد مراجعه الزامی است</string>
+
+    <string name="confirm_checkout_message">آیا از ثبت خروج «%1$s» اطمینان دارید؟</string>
+    <string name="last_status_format">وضعیت: %1$s</string>
+
+    <string name="log_entered_format">%1$s وارد شد</string>
+    <string name="log_exited_format">%1$s خارج شد</string>
+    <string name="recent_activity_empty">هنوز رویدادی ثبت نشده است</string>
+
+    <string name="search_hint">جست‌وجوی سریع…</string>
+    <string name="menu_search">جست‌وجو</string>
+    <string name="menu_setup">تنظیمات اولیه</string>
+    <string name="menu_report">گزارش‌ها</string>
+    <string name="menu_settings">تنظیمات نمایش</string>
+
+    <string name="settings_title">تنظیمات نمایش و کلیک</string>
+    <string name="settings_section_display">نمایش</string>
+    <string name="settings_section_interaction">تعامل / کلیک</string>
+    <string name="settings_section_theme">پوسته برنامه</string>
+    <string name="settings_show_recent_activity">نمایش فعالیت اخیر در هر تب</string>
+    <string name="settings_inside_first">نمایش موارد «داخل» در بالای هر بخش</string>
+    <string name="settings_haptic">لرزش هنگام تایید ورود/خروج</string>
+    <string name="settings_quick_tap">کلیک سریع (رد کردن منوی انتخاب برای ورود)</string>
+    <string name="settings_quick_tap_hint">در این حالت، کلیک روی یک مورد «خارج» بلافاصله ورود آن را ثبت می‌کند. خروج همیشه نیاز به تایید دارد.</string>
+    <string name="settings_theme_system">پیش‌فرض سیستم</string>
+    <string name="settings_theme_light">روشن</string>
+    <string name="settings_theme_dark">تیره</string>
+
+    <string name="settings_section_ai">تحلیل هوشمند (هوش مصنوعی)</string>
+    <string name="settings_ai_hint">برای فعال شدن «تحلیل هوشمند» در گزارش‌ها، «پردازش عکس پرسنلی» و «تشخیص خودکار پلاک» در تنظیمات اولیه، یک کلید رایگان Gemini از aistudio.google.com/apikey بسازید و اینجا وارد کنید. این کلید فقط روی گوشی شما ذخیره می‌شود.</string>
+    <string name="settings_ai_key_hint">کلید API</string>
+    <string name="ai_key_saved">کلید API ذخیره شد</string>
+
+    <string name="settings_section_web_panel">پنل مدیریت وب</string>
+    <string name="settings_web_panel_hint">آدرس اینترنتی پنل مدیریت وب که میزبانی کرده‌اید را اینجا وارد کنید (مثلاً از GitHub Pages). با زدن دکمه «پنل مدیریت وب» در بالای صفحه اصلی، این آدرس در مرورگر گوشی باز می‌شود.</string>
+    <string name="settings_web_panel_url_hint">آدرس پنل (URL)</string>
+    <string name="web_panel_url_saved">آدرس پنل ذخیره شد</string>
+
+    <string name="menu_web_panel">پنل مدیریت وب</string>
+    <string name="web_panel_url_missing_title">آدرس پنل تنظیم نشده</string>
+    <string name="web_panel_url_missing_message">ابتدا آدرس پنل مدیریت وب را در صفحه تنظیمات وارد کنید.</string>
+
+    <string name="edit_person_title">ویرایش مشخصات</string>
+    <string name="btn_edit">ویرایش</string>
+    <string name="edit_success">تغییرات ذخیره شد</string>
+    <string name="long_press_hint">برای ویرایش مشخصات، لمس طولانی کنید</string>
+
+    <string name="report_analytics_sheet_name">خلاصه آماری</string>
+    <string name="col_summary_metric">شاخص</string>
+    <string name="col_summary_value">مقدار</string>
+    <string name="summary_total_events">کل رویدادها در این بازه</string>
+    <string name="summary_total_in">کل ورودها</string>
+    <string name="summary_total_out">کل خروج‌ها</string>
+    <string name="summary_currently_inside">در حال حاضر داخل کارخانه (اکنون)</string>
+    <string name="summary_by_category_header">بر اساس دسته</string>
+
+    <string name="setup_title">تنظیمات اولیه</string>
+    <string name="setup_subtitle_personnel">افزودن عکس پرسنلی</string>
+    <string name="setup_subtitle_machinery">افزودن عکس ماشین‌آلات</string>
+    <string name="setup_subtitle_driver">افزودن عکس رانندگان</string>
+    <string name="setup_pick_image">انتخاب عکس</string>
+    <string name="setup_take_photo">گرفتن عکس</string>
+    <string name="setup_image_updated">عکس به‌روزرسانی شد</string>
+    <string name="setup_photo_read_error">خطا در خواندن تصویر انتخاب‌شده</string>
+
+    <string name="btn_ok">باشه</string>
+
+    <string name="report_title">گزارش‌ها و خروجی اکسل</string>
+    <string name="report_from_date">از تاریخ</string>
+    <string name="report_to_date">تا تاریخ</string>
+    <string name="report_export_button">دریافت خروجی اکسل</string>
+    <string name="report_export_success">فایل اکسل با موفقیت ساخته شد</string>
+    <string name="report_export_empty">در این بازه زمانی هیچ رویدادی ثبت نشده است</string>
+    <string name="report_row_count_format">%1$d ردیف برای خروجی یافت شد</string>
+
+    <string name="col_name">نام / مورد</string>
+    <string name="col_category">دسته</string>
+    <string name="col_department">واحد / گروه</string>
+    <string name="col_action">نوع رویداد</string>
+    <string name="col_timestamp">تاریخ و ساعت</string>
+    <string name="action_in_label">ورود</string>
+    <string name="action_out_label">خروج</string>
+
+    <string name="global_search_title">جست‌وجوی کلی</string>
+
+    <string name="login_hint_name">نام و نام خانوادگی</string>
+    <string name="login_hint_email">ایمیل</string>
+    <string name="login_hint_password">رمز عبور</string>
+    <string name="login_btn_signin">ورود</string>
+    <string name="login_btn_signup">ساخت حساب جدید</string>
+    <string name="login_toggle_to_signup">حساب ندارید؟ ثبت‌نام کنید</string>
+    <string name="login_toggle_to_signin">حساب دارید؟ وارد شوید</string>
+    <string name="login_error_email">ایمیل معتبر وارد کنید</string>
+    <string name="login_error_password">رمز عبور باید حداقل ۶ کاراکتر باشد</string>
+    <string name="login_signup_success">حساب شما با نقش «%1$s» ساخته شد</string>
+    <string name="menu_sign_out">خروج از حساب</string>
+    <string name="sign_out_confirm_title">خروج از حساب</string>
+    <string name="sign_out_confirm_message">آیا مطمئن هستید که می‌خواهید از حساب کاربری خارج شوید؟</string>
+    <string name="signed_in_as_format">%1$s (%2$s)</string>
+
+    <string name="menu_dashboard">پنل مدیریت</string>
+    <string name="dashboard_title">پنل مدیریت و نظارت</string>
+    <string name="dashboard_live_now">وضعیت زنده کارخانه</string>
+    <string name="dashboard_all_inside_header">همه افراد و ماشین‌آلات داخل کارخانه</string>
+    <string name="dashboard_empty_inside">در حال حاضر کسی/چیزی داخل کارخانه نیست.</string>
+    <string name="dashboard_open_reports">مشاهده گزارش‌ها و خروجی اکسل</string>
+    <string name="dashboard_open_setup">تنظیمات اولیه (عکس‌ها)</string>
+
+    <string name="ai_analyze_button">تحلیل هوشمند گزارش (AI)</string>
+    <string name="ai_analyzing">در حال تحلیل توسط هوش مصنوعی…</string>
+    <string name="ai_result_title">نتیجه تحلیل هوش مصنوعی</string>
+    <string name="ai_key_missing_title">کلید API تنظیم نشده</string>
+    <string name="ai_key_missing_message">برای استفاده از تحلیل هوشمند، ابتدا یک کلید API رایگان در صفحه تنظیمات وارد کنید.</string>
+    <string name="ai_open_settings">رفتن به تنظیمات</string>
+
+    <string name="category_inspection">بازدید هفتگی</string>
+    <string name="inspection_list_title">بازدید ظاهری هفتگی ماشین‌آلات</string>
+    <string name="inspection_empty_list">ماشین‌آلاتی برای بازدید ثبت نشده است.</string>
+    <string name="inspection_done_this_week">این هفته انجام شد</string>
+    <string name="inspection_not_done_this_week">این هفته بازدید نشده</string>
+    <string name="inspection_never_done">تاکنون بازدید نشده</string>
+    <string name="inspection_last_result_format">آخرین بازدید: %1$s تایید، %2$s عدم تایید</string>
+    <string name="inspection_last_date_format">تاریخ آخرین بازدید: %1$s</string>
+    <string name="inspection_form_title">بازدید ظاهری</string>
+    <string name="inspection_form_subtitle_format">پلاک %1$s — راننده: %2$s</string>
+    <string name="inspection_status_ok">سالم</string>
+    <string name="inspection_status_defect">خراب</string>
+    <string name="inspection_notes_hint">توضیحات (اختیاری) — مثلاً تعمیر یا نقصی که باید پیگیری شود</string>
+    <string name="inspection_summary_format">%1$s مورد تایید — %2$s مورد عدم تایید</string>
+    <string name="inspection_submit">ثبت بازدید</string>
+    <string name="inspection_submit_success">بازدید هفتگی با موفقیت ثبت شد</string>
+    <string name="inspection_export_button">خروجی اکسل بازدید ظاهری</string>
+    <string name="inspection_export_empty">در این بازه، بازدیدی ثبت نشده است.</string>
+
+    <!-- Touch-diagram inspection form -->
+    <string name="inspection_diagram_hint">روی هر قسمت از ماشین ضربه بزنید: یک بار = نیاز به بررسی (زرد)، دو بار = خراب (قرمز)، سه بار = سالم. نگه‌داشتن انگشت مستقیم خراب علامت می‌زند. برای بزرگ‌نمایی و جابه‌جایی، مستقیم روی تصویر با دو انگشت یا با کشیدن انگشت عمل کنید.</string>
+    <string name="inspection_status_warn">نیاز به بررسی</string>
+    <string name="inspection_still_open_hint">دایره‌ی قرمز دور یک قسمت یعنی هفته‌ی قبل هم خراب بوده و هنوز تعمیر ثبت نشده — لطفاً وضعیت فعلی‌اش را بررسی و ثبت کنید.</string>
+    <string name="inspection_nonspatial_title">موارد بدون مکان مشخص روی بدنه</string>
+    <string name="inspection_note_dialog_title">یادداشت و عکس ایراد</string>
+    <string name="inspection_note_hint">توضیح کوتاه ایراد (اختیاری)</string>
+    <string name="inspection_attach_photo">افزودن عکس</string>
+    <string name="inspection_photo_attached">یک عکس ضمیمه شد</string>
+    <string name="inspection_save_note">ذخیره</string>
+
+    <!-- Open defects / repair closure -->
+    <string name="open_defects_title">دفترچه ایرادات باز</string>
+    <string name="open_defects_empty">در حال حاضر ایراد بازی ثبت نشده است.</string>
+    <string name="open_defects_item_format">%1$s — %2$s</string>
+    <string name="open_defects_recurring_badge">تکراری از هفته قبل</string>
+    <string name="open_defects_mark_repaired">ثبت تعمیر</string>
+    <string name="open_defects_repaired_success">تعمیر ثبت شد</string>
+
+    <!-- Fleet heatmap -->
+    <string name="fleet_heatmap_title">نقشه حرارتی ایرادات ناوگان</string>
+    <string name="fleet_heatmap_hint">رنگ هر قسمت بر اساس تعداد دفعاتی که در این بازه به‌عنوان ایراد ثبت شده، از خاکستری (کم) تا قرمز (زیاد) است.</string>
+    <string name="fleet_heatmap_empty">در این بازه، بازدیدی برای این دسته ثبت نشده است.</string>
+    <string name="fleet_heatmap_open_button">نقشه حرارتی ناوگان</string>
+
+    <string name="inspection_all_done_this_week">همه‌ی ماشین‌های این دسته، بازدید این هفته‌شان ثبت شده است. هفته‌ی بعد دوباره در این لیست ظاهر می‌شوند.</string>
+
+    <string name="app_credit">طراحی و توسعه: سعید رضایی</string>
+
+    <!-- ورود و خروج اقلام و کالاها -->
+    <string name="category_item_log">ورود و خروج کالا</string>
+    <string name="item_log_filter_in">ورود</string>
+    <string name="item_log_filter_out">خروج</string>
+    <string name="item_log_filter_pending_return">در انتظار برگشت</string>
+    <string name="item_log_empty_list">موردی ثبت نشده است.\nبرای افزودن، دکمه + را بزنید.</string>
+    <string name="item_log_empty_pending_return">در حال حاضر کالایی در انتظار برگشت نیست.</string>
+    <string name="item_log_fab_text">ثبت ورود / خروج کالا</string>
+    <string name="item_log_choose_direction_title">نوع ثبت را انتخاب کنید</string>
+    <string name="item_log_add_in">ثبت ورود کالا</string>
+    <string name="item_log_add_out">ثبت خروج کالا</string>
+    <string name="item_log_add_success">با موفقیت ثبت شد</string>
+    <string name="item_log_mark_returned">ثبت برگشت</string>
+    <string name="item_log_marked_returned_success">برگشت کالا ثبت شد</string>
+    <string name="item_log_returned_badge">برگشت داده شد</string>
+
+    <string name="item_log_hint_item_name">نوع قطعه یا جنس</string>
+    <string name="item_log_hint_store">فروشگاهی که از آن خرید شده</string>
+    <string name="item_log_hint_buyer">نام شخصی که خرید کرده</string>
+    <string name="item_log_hint_ordered_by_in">نام شخصی که دستور خرید داده است</string>
+    <string name="item_log_hint_department">مربوط به کدام واحد</string>
+    <string name="item_log_hint_invoice_number">شماره فاکتور</string>
+
+    <string name="item_log_hint_exit_slip_number">شماره برگه خروج</string>
+    <string name="item_log_hint_carrier">شخصی که قطعه را حمل می‌کند</string>
+    <string name="item_log_hint_ordered_by_out">به دستور چه کسی</string>
+    <string name="item_log_hint_reason">علت خروج</string>
+
+    <string name="item_log_detail_store_format">فروشگاه: %1$s</string>
+    <string name="item_log_detail_buyer_format">خریدار: %1$s</string>
+    <string name="item_log_detail_ordered_by_format">دستور: %1$s</string>
+    <string name="item_log_detail_department_format">واحد: %1$s</string>
+    <string name="item_log_detail_invoice_format">فاکتور: %1$s</string>
+    <string name="item_log_detail_exit_slip_format">برگه خروج: %1$s</string>
+    <string name="item_log_detail_carrier_format">حمل‌کننده: %1$s</string>
+    <string name="item_log_detail_reason_format">علت: %1$s</string>
+
+    <!-- Reports: goods entry/exit summary -->
+    <string name="item_log_export_button">خروجی اکسل ورود و خروج کالا</string>
+    <string name="item_log_export_empty">در این بازه، هیچ ورود یا خروج کالایی ثبت نشده است.</string>
+    <string name="item_log_report_sheet_in">ورود کالا</string>
+    <string name="item_log_report_sheet_out">خروج کالا</string>
+    <string name="summary_item_logs_header">اقلام و کالاها</string>
+    <string name="summary_item_logs_total_in">تعداد ورود کالا</string>
+    <string name="summary_item_logs_total_out">تعداد خروج کالا</string>
+    <string name="summary_item_logs_pending_return">در انتظار برگشت (کل)</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_items_today_header">کالا و اقلام امروز</string>
+    <string name="dashboard_items_in_today">ورود امروز</string>
+    <string name="dashboard_items_out_today">خروج امروز</string>
+</resources>
