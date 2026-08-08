@@ -1,0 +1,63 @@
+name: Build Debug APK
+
+# Runs automatically whenever you push to the repo, and also lets you
+# trigger it manually from the "Actions" tab (the "Run workflow" button).
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Always runs, even if a later step fails, so we can see exactly what got
+      # uploaded to the repo without needing a screenshot.
+      - name: List repository contents (debug)
+        run: find . -maxdepth 6 -not -path '*/.git*' | sort
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.4'
+
+      # Finds the folder that actually contains settings.gradle, no matter whether the
+      # project ended up at the repo root or nested one level deeper.
+      - name: Locate Gradle project root
+        id: locate
+        run: |
+          if [ -f "settings.gradle" ] || [ -f "settings.gradle.kts" ]; then
+            echo "project_dir=." >> "$GITHUB_OUTPUT"
+          else
+            FOUND=$(find . -maxdepth 8 \( -name "settings.gradle" -o -name "settings.gradle.kts" \) -print -quit)
+            if [ -z "$FOUND" ]; then
+              echo "::error::Could not find settings.gradle anywhere in the repository. See the 'List repository contents (debug)' step above to check what was actually uploaded — settings.gradle, build.gradle, and gradle.properties must all be present at the project root."
+              exit 1
+            fi
+            DIR=$(dirname "$FOUND")
+            echo "Found Gradle project at: $DIR"
+            echo "project_dir=$DIR" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build debug APK
+        working-directory: ${{ steps.locate.outputs.project_dir }}
+        run: gradle assembleDebug --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: ${{ steps.locate.outputs.project_dir }}/app/build/outputs/apk/debug/app-debug.apk
